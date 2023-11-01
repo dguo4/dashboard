@@ -20,6 +20,7 @@ else:
     print('AWS API failed with url: ' + ALL_TRANSACTIONS_URL)
 
 df = df.loc[:, ALL_TRANSACTIONS_COLUMNS]
+df = df.sort_values(by=['date'], ascending=False)
 
 
 # dashbaord
