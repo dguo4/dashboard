@@ -1,3 +1,5 @@
+import datetime
+
 from dash import Dash, html, dcc, callback, Output, Input, dash_table
 import json
 import pandas as pd
@@ -27,10 +29,14 @@ df = df.sort_values(by=['date'], ascending=False)
 app = Dash(__name__)
 server = app.server
 
-app.layout = html.Div([
-    html.H1(children='My investment details', style={'textAlign':'center'}),
-    dash_table.DataTable(data=df.to_dict('records'), page_size=10)
-])
+def serve_layout():
+    return html.Div([
+        html.H1(children='My investment details', style={'textAlign':'center'}),
+        html.Header(children='Refreshed at ' + str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')), style={'textAlign':'right'}),
+        dash_table.DataTable(data=df.to_dict('records'), page_size=10)
+    ])
+
+app.layout = serve_layout
 
 if __name__ == '__main__':
     app.run(debug=True)
