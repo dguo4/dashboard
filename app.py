@@ -2,7 +2,6 @@ from dash import Dash, html, dcc, callback, Output, Input, dash_table
 import json
 import pandas as pd
 import requests
-from data import *
 
 # load config data
 config_file = open('./config/dashboard.json')
@@ -25,6 +24,7 @@ df = df.loc[:, ALL_TRANSACTIONS_COLUMNS]
 
 # dashbaord
 app = Dash(__name__)
+server = app.server
 
 app.layout = html.Div([
     html.H1(children='My investment details', style={'textAlign':'center'}),
