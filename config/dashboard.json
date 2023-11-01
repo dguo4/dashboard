@@ -1,0 +1,8 @@
+{
+  "api":
+  {
+    "base_url": "https://czshves646oxsz6754nnghy77a0kszjc.lambda-url.us-east-1.on.aws/",
+    "all_transactions_url":"all_transactions"
+  },
+  "transactions_columns": ["date", "account", "ticker", "price", "quantity", "assetGroup", "assetType", "type"]
+}
