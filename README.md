@@ -14,6 +14,6 @@ After making changes on the code, there are two steps needed to be done:
    ```powershell 
    git add . 
    git commit -am "commit comments"
-   heroku git:remote -a investment-dashboard
+   git push heroku master
    ```
    
