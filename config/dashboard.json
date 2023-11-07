@@ -1,8 +1,29 @@
 {
-  "api":
-  {
+  "api": {
     "base_url": "https://czshves646oxsz6754nnghy77a0kszjc.lambda-url.us-east-1.on.aws/",
-    "all_transactions_url":"all_transactions"
+    "all_transactions_url": "all_transactions",
+    "all_positions_url": "all_positions"
   },
-  "transactions_columns": ["date", "account", "ticker", "price", "quantity", "assetGroup", "assetType", "type"]
+  "schema": {
+    "transactions_columns": ["date", "account", "ticker", "price", "quantity", "assetGroup", "assetType", "type"],
+    "positions_columns": ["date", "ticker", "price", "quantity", "assetGroup", "assetType"]
+  },
+  "dash_table": {
+    "transactions_dash_table_columns": [
+        {"name": "Date", "id": "date", "type": "text"},
+        {"name": "Account", "id": "account", "type": "text"},
+        {"name": "Ticker", "id": "ticker", "type": "text"},
+        {"name": "Price", "id": "price", "type": "numeric"},
+        {"name": "Quantity", "id": "quantity", "type": "numeric"}
+    ],
+    "positions_dash_table_columns": [
+      {"name": "Date", "id": "date", "type": "text"},
+      {"name": "Ticker", "id": "ticker", "type": "text"},
+      {"name": "Price", "id": "price", "type": "numeric"},
+      {"name": "Quantity", "id": "quantity", "type": "numeric"},
+      {"name": "Asset Group", "id": "assetGroup", "type": "text"},
+      {"name": "Asset Type", "id": "assetType", "type": "text"}
+    ]
+  }
+
 }
