@@ -8,6 +8,8 @@ import requests
 import pytz
 import plotly
 import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from collections import OrderedDict
 
@@ -16,6 +18,8 @@ config_file = open('./config/dashboard.json')
 config = json.load(config_file)
 
 BASE_URL = config['api']['base_url']
+EQUITY_PRICE_URL = config['equity_price_url']
+CRYPTO_PRICE_URL = config['crypto_price_url']
 ALL_TRANSACTIONS_URL = BASE_URL + config['api']['all_transactions_url']
 ALL_TRANSACTIONS_COLUMNS = config['schema']['transactions_columns']
 ALL_POSITIONS_URL = BASE_URL + config['api']['all_positions_url']
@@ -32,6 +36,7 @@ else:
 transactions_df = df.loc[:, ALL_TRANSACTIONS_COLUMNS]
 transactions_df['date'] = pd.to_datetime(transactions_df['date'])
 transactions_df = transactions_df.sort_values(by=['date'], ascending=False)
+transactions_df['cost'] = transactions_df['price']*transactions_df['quantity']
 
 positions_response = requests.get(ALL_POSITIONS_URL)
 if positions_response.status_code == 200:
@@ -41,7 +46,13 @@ else:
 
 positions_df = df.loc[:, ALL_POSITIONS_COLUMNS]
 positions_df['date'] = pd.to_datetime(positions_df['date'])
+positions_df['date'] = positions_df['date'].dt.date
 positions_df = positions_df.sort_values(by=['date'], ascending=False)
+ALL_POSITIONS_COLUMNS.remove('date')
+positions_df = positions_df.drop_duplicates(
+    subset=ALL_POSITIONS_COLUMNS,
+    keep='last'
+).reset_index(drop=True)
 
 # get New York timezone
 # Get the current time in UTC
@@ -97,7 +108,7 @@ app.layout = dbc.Container([
         dcc.Graph(id='transaction_price_time_series_graph',
                   className='six columns',
                   config={
-                      'staticPlot': True,
+                      'staticPlot': False,
                       'scrollZoom': False,
                       'showTips': True,
                       'displayModeBar': False
@@ -105,7 +116,7 @@ app.layout = dbc.Container([
         dcc.Graph(id='transaction_quantity_time_series_graph',
                   className='six columns',
                   config={
-                      'staticPlot': True,
+                      'staticPlot': False,
                       'scrollZoom': False,
                       'showTips': False,
                       'displayModeBar': False
@@ -136,15 +147,24 @@ def update_positions_table(ticker_var, row_var):
 def update_transactions_price_graph(ticker_var):
     transactions_dff = transactions_df.copy()
     if ticker_var:
-        transactions_dff = transactions_df.loc[transactions_dff['ticker'] == ticker_var, :]
-        ticker_market_price = 400.21
+        transactions_dff = transactions_dff.loc[transactions_dff['ticker'] == ticker_var, :]
+        if ticker_var == 'BTC':
+            price_url = CRYPTO_PRICE_URL.format(ticker=ticker_var)
+        else:
+            price_url = EQUITY_PRICE_URL.format(ticker=ticker_var)
+        market_price_response = requests.get(price_url)
+        ticker_market_price = market_price_response.json()['results'][0]['c']
         # create the chart
         fig = px.line(x=transactions_dff['date'].unique().tolist(),
                       y=transactions_dff['price'],
                       labels=dict(x='Date', y='Purchase price'),
                       title=ticker_var+' Purchase Price Trend',
                       markers=True)
-        fig.add_hline(y=ticker_market_price)
+        fig.add_hline(y=ticker_market_price,
+                      line_dash='dash',
+                      line_color='green',
+                      annotation_text='latest market price',
+                      annotation_position='bottom right')
 
     return fig
 
@@ -157,17 +177,36 @@ def update_transactions_quantity_graph(ticker_var):
     transactions_dff = transactions_df.copy()
     positions_dff = positions_df.copy()
     if ticker_var:
-        transactions_dff = transactions_df.loc[transactions_dff['ticker'] == ticker_var, :]
-        # create the chart
-        fig = px.line(x=positions_dff['date'].tolist(),
-                      y=positions_dff['quantity'],
-                      labels=dict(x='Date', y='Total Quantity'),
-                      title=ticker_var+' Quantity Trend',
-                      markers=True)
+        transactions_dff = transactions_dff.loc[transactions_dff['ticker'] == ticker_var, :]
+        positions_dff = positions_dff.loc[positions_dff['ticker'] == ticker_var, :]
+        # Create figure with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-        fig.add_bar(x=transactions_dff['date'].tolist(),
-                    y=transactions_dff['quantity'],
-                    name='Transactions')
+        fig.add_trace(
+            go.Scatter(x=positions_dff['date'].tolist(),
+                       y=positions_dff['quantity'],
+                       name='Total quantity'), secondary_y=False)
+
+        fig.add_trace(
+            go.Bar(x=transactions_dff['date'].tolist(),
+                   y=transactions_dff['quantity'],
+                   name='Transaction quantity'), secondary_y=True)
+
+        # Set x-axis title
+        fig.update_xaxes(title_text="Date")
+
+        # Set y-axes titles
+        max_transaction_quantity = max(transactions_dff['quantity'])
+        fig.update_yaxes(
+            title_text="<b>primary</b> total quantity",
+            range=[max_transaction_quantity*0.8, None],
+            secondary_y=False
+        )
+        fig.update_yaxes(
+            title_text="<b>secondary</b> transaction quantity",
+            range=[None, max_transaction_quantity*2],
+            secondary_y=True
+        )
 
     return fig
 

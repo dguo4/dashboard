@@ -8,6 +8,8 @@
     "transactions_columns": ["date", "account", "ticker", "price", "quantity", "assetGroup", "assetType", "type"],
     "positions_columns": ["date", "ticker", "price", "quantity", "assetGroup", "assetType"]
   },
+  "crypto_price_url": "https://api.polygon.io/v2/aggs/ticker/X:{ticker}USD/prev?adjusted=true&apiKey=ZfJhLblDjEydHU1bDuJp3RLfTX8pp4PC",
+  "equity_price_url": "https://api.polygon.io/v2/aggs/ticker/{ticker}/prev?adjusted=true&apiKey=ZfJhLblDjEydHU1bDuJp3RLfTX8pp4PC",
   "dash_table": {
     "transactions_dash_table_columns": [
         {"name": "Date", "id": "date", "type": "text"},
