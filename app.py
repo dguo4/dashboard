@@ -26,7 +26,7 @@ ALL_POSITIONS_URL = BASE_URL + config['api']['all_positions_url']
 ALL_POSITIONS_COLUMNS = config['schema']['positions_columns']
 
 
-# get data from AWS API
+# transactions data
 transactions_response = requests.get(ALL_TRANSACTIONS_URL)
 if transactions_response.status_code == 200:
     df = pd.DataFrame(transactions_response.json())
@@ -36,8 +36,8 @@ else:
 transactions_df = df.loc[:, ALL_TRANSACTIONS_COLUMNS]
 transactions_df['date'] = pd.to_datetime(transactions_df['date'])
 transactions_df = transactions_df.sort_values(by=['date'], ascending=False)
-transactions_df['cost'] = transactions_df['price']*transactions_df['quantity']
 
+# positions data
 positions_response = requests.get(ALL_POSITIONS_URL)
 if positions_response.status_code == 200:
     df = pd.DataFrame(positions_response.json())
@@ -53,6 +53,24 @@ positions_df = positions_df.drop_duplicates(
     subset=ALL_POSITIONS_COLUMNS,
     keep='last'
 ).reset_index(drop=True)
+positions_df['assetCost'] = positions_df['price']*positions_df['quantity']
+
+
+# market data
+ticker_list = positions_df['ticker'].unique().tolist()
+market_data_list = []
+for one_ticker in ticker_list:
+    if one_ticker == 'BTC':
+        price_url = CRYPTO_PRICE_URL.format(ticker=one_ticker)
+    else:
+        price_url = EQUITY_PRICE_URL.format(ticker=one_ticker)
+    market_price_response = requests.get(price_url)
+    ticker_market_price = market_price_response.json()['results'][0]['c']
+    # TODO: force system to sleep for few seconds
+    market_data_list.append({one_ticker: ticker_market_price})
+
+marketData_df = pd.DataFrame(market_data_list)
+
 
 # get New York timezone
 # Get the current time in UTC
@@ -89,7 +107,7 @@ app.layout = dbc.Container([
     # positions table
     positions_table := dash_table.DataTable(
         columns=config['dash_table']['positions_dash_table_columns'],
-        data=positions_df.to_dict('records'),
+        data=positions_df.loc[:, config['dash_table']['positions_dash_table_columns']].to_dict('records'),
         filter_action='native',
         page_size=10,
         style_data={
