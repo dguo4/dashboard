@@ -1,6 +1,7 @@
 import datetime as dt
 
 from dash import Dash, html, dcc, callback, Output, Input, dash_table
+from dash.dash_table import DataTable, FormatTemplate
 import dash_bootstrap_components as dbc
 import json
 import pandas as pd
@@ -25,6 +26,10 @@ ALL_TRANSACTIONS_COLUMNS = config['schema']['transactions_columns']
 ALL_POSITIONS_URL = BASE_URL + config['api']['all_positions_url']
 ALL_POSITIONS_COLUMNS = config['schema']['positions_columns']
 
+# format
+positions_dash_table_columns = config['dash_table']['positions_dash_table_columns']
+money = FormatTemplate.money(2)
+positions_dash_table_columns[2]['format'] = money
 
 # get data from AWS API
 transactions_response = requests.get(ALL_TRANSACTIONS_URL)
@@ -88,7 +93,7 @@ app.layout = dbc.Container([
 
     # positions table
     positions_table := dash_table.DataTable(
-        columns=config['dash_table']['positions_dash_table_columns'],
+        columns=positions_dash_table_columns,
         data=positions_df.to_dict('records'),
         filter_action='native',
         page_size=10,
@@ -163,7 +168,7 @@ def update_transactions_price_graph(ticker_var):
         fig.add_hline(y=ticker_market_price,
                       line_dash='dash',
                       line_color='green',
-                      annotation_text='latest market price',
+                      annotation_text='latest market price = ' + str(ticker_market_price),
                       annotation_position='bottom right')
 
     return fig
@@ -207,6 +212,14 @@ def update_transactions_quantity_graph(ticker_var):
             range=[None, max_transaction_quantity*2],
             secondary_y=True
         )
+
+        # Set legend location
+        fig.update_layout(legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01
+        ))
 
     return fig
 

@@ -21,8 +21,8 @@
     "positions_dash_table_columns": [
       {"name": "Date", "id": "date", "type": "text"},
       {"name": "Ticker", "id": "ticker", "type": "text"},
-      {"name": "Price", "id": "price", "type": "numeric"},
-      {"name": "Quantity", "id": "quantity", "type": "numeric"},
+      {"name": "Avg. Purchase Price", "id": "price", "type": "numeric"},
+      {"name": "Acc. Quantity", "id": "quantity", "type": "numeric"},
       {"name": "Asset Group", "id": "assetGroup", "type": "text"},
       {"name": "Asset Type", "id": "assetType", "type": "text"}
     ]
