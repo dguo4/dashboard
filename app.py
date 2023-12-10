@@ -1,76 +1,39 @@
 import datetime as dt
 
-from dash import Dash, html, dcc, callback, Output, Input, dash_table
+from dash import Dash, html, dcc, callback, Output, Input, dash_table, no_update
 import dash_bootstrap_components as dbc
+from dash.dash_table import FormatTemplate
 import json
-import pandas as pd
-import requests
 import pytz
-import plotly
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import time
 
-from collections import OrderedDict
+from data.load_transaction_data import return_transactions_data
+from data.load_position_data import return_positions_data, rich_positions_data
+from data.load_market_data import return_market_data
+
 
 # load config data
 config_file = open('./config/dashboard.json')
 config = json.load(config_file)
 
-BASE_URL = config['api']['base_url']
-EQUITY_PRICE_URL = config['equity_price_url']
-CRYPTO_PRICE_URL = config['crypto_price_url']
-ALL_TRANSACTIONS_URL = BASE_URL + config['api']['all_transactions_url']
-ALL_TRANSACTIONS_COLUMNS = config['schema']['transactions_columns']
-ALL_POSITIONS_URL = BASE_URL + config['api']['all_positions_url']
-ALL_POSITIONS_COLUMNS = config['schema']['positions_columns']
-
+# format
+money = FormatTemplate.money(2)
+percentage = FormatTemplate.percentage(2)
 
 # transactions data
-transactions_response = requests.get(ALL_TRANSACTIONS_URL)
-if transactions_response.status_code == 200:
-    df = pd.DataFrame(transactions_response.json())
-else:
-    print('AWS API failed with url: ' + ALL_TRANSACTIONS_URL)
-
-transactions_df = df.loc[:, ALL_TRANSACTIONS_COLUMNS]
-transactions_df['date'] = pd.to_datetime(transactions_df['date'])
-transactions_df = transactions_df.sort_values(by=['date'], ascending=False)
+transactions_df = return_transactions_data()
 
 # positions data
-positions_response = requests.get(ALL_POSITIONS_URL)
-if positions_response.status_code == 200:
-    df = pd.DataFrame(positions_response.json())
-else:
-    print('AWS API failed with url: ' + ALL_POSITIONS_COLUMNS)
-
-positions_df = df.loc[:, ALL_POSITIONS_COLUMNS]
-positions_df['date'] = pd.to_datetime(positions_df['date'])
-positions_df['date'] = positions_df['date'].dt.date
-positions_df = positions_df.sort_values(by=['date'], ascending=False)
-ALL_POSITIONS_COLUMNS.remove('date')
-positions_df = positions_df.drop_duplicates(
-    subset=ALL_POSITIONS_COLUMNS,
-    keep='last'
-).reset_index(drop=True)
-positions_df['assetCost'] = positions_df['price']*positions_df['quantity']
-
+positions_df = return_positions_data()
 
 # market data
 ticker_list = positions_df['ticker'].unique().tolist()
-market_data_list = []
-for one_ticker in ticker_list:
-    if one_ticker == 'BTC':
-        price_url = CRYPTO_PRICE_URL.format(ticker=one_ticker)
-    else:
-        price_url = EQUITY_PRICE_URL.format(ticker=one_ticker)
-    market_price_response = requests.get(price_url)
-    ticker_market_price = market_price_response.json()['results'][0]['c']
-    # TODO: force system to sleep for few seconds
-    market_data_list.append({one_ticker: ticker_market_price})
+marketData_df = return_market_data(ticker_list)
 
-marketData_df = pd.DataFrame(market_data_list)
-
+riched_positions_df = rich_positions_data(transactions_df, positions_df, marketData_df)
 
 # get New York timezone
 # Get the current time in UTC
@@ -86,6 +49,7 @@ new_york_time = utc_now.replace(tzinfo=pytz.utc).astimezone(new_york_timezone)
 # dashbaord
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
+initial_active_cell = {"row": 0, "column": 0, "column_id": "Ticker", "row_id": 0}
 
 app.layout = dbc.Container([
     # title
@@ -94,21 +58,31 @@ app.layout = dbc.Container([
     # refresh time
     html.Header('Refreshed at ' + str(new_york_time.strftime('%Y-%m-%d %H:%M:%S')), style={'textAlign': 'right'}),
 
-    # transaction table dropdown filter
-    dbc.Row([
-        dbc.Col([
-            ticker_drop := dcc.Dropdown(value='VOO',
-                                        options=[x for x in sorted(positions_df['ticker'].unique())],
-                                        placeholder='Ticker')], width=3),
-    ]),
+    # # transaction table dropdown filter
+    # dbc.Row([
+    #     dbc.Col([
+    #         ticker_drop := dcc.Dropdown(value='VOO',
+    #                                     options=[x for x in sorted(positions_df['ticker'].unique())],
+    #                                     placeholder='Ticker')], width=3),
+    # ]),
 
     html.Br(),
-
+    print(riched_positions_df.columns),
     # positions table
-    positions_table := dash_table.DataTable(
-        columns=config['dash_table']['positions_dash_table_columns'],
-        data=positions_df.loc[:, config['dash_table']['positions_dash_table_columns']].to_dict('records'),
-        filter_action='native',
+    summary_table := dash_table.DataTable(
+        id='summaryTable_id',
+        columns=[
+          {"name": "Ticker", "id": "Ticker", "type": "text"},
+          {"name": "Asset Type", "id": "Asset Type", "type": "text"},
+          {"name": "Total Share", "id": "Total Share", "type": "numeric", "format": money},
+          {"name": "Total Cost", "id": "Total Cost", "type": "numeric", "format": money},
+          {"name": "Avg. Price", "id": "Avg Price", "type": "numeric", "format": money},
+          {"name": "Std. Price", "id": "Std Price", "type": "numeric", "format": percentage},
+          {"name": "Unreal. PnL", "id": "Unreal PnL", "type": "numeric", "format": money}
+        ],
+        data=riched_positions_df.to_dict('records'),
+        active_cell=initial_active_cell,
+        editable=False,
         page_size=10,
         style_data={
             'width': '150px', 'minWidth': '150px', 'maxWidth': '150px',
@@ -117,9 +91,9 @@ app.layout = dbc.Container([
         }
     ),
 
-    # select row
-    dbc.Label('Select # of rows: '),
-    row_drop := dcc.Dropdown(value=5, clearable=False, style={'width': '35%'}, options = [5, 10, 15]),
+    # # select row
+    # dbc.Label('Select # of rows: '),
+    # row_drop := dcc.Dropdown(value=5, clearable=False, style={'width': '35%'}, options = [5, 10, 15]),
 
     # transaction time series graph
     html.Div([
@@ -144,56 +118,65 @@ app.layout = dbc.Container([
 
 # ----------------------------------------------------------------------------------------------------------------------
 # update position table
-@app.callback(
-    Output(positions_table, 'data'),
-    Output(positions_table, 'page_size'),
-    Input(ticker_drop, 'value'),
-    Input(row_drop, 'value')
-)
-def update_positions_table(ticker_var, row_var):
-    positions_dff = positions_df.copy()
-    if ticker_var:
-        positions_dff = positions_dff.loc[positions_dff['ticker'] == ticker_var, :]
-
-    return positions_dff.to_dict('records'), row_var
+# @app.callback(
+#     Output(summary_table, 'data'),
+#     Output(summary_table, 'page_size'),
+#     Input(ticker_drop, 'value'),
+#     Input(row_drop, 'value')
+# )
+# def update_summary_table(ticker_var, row_var):
+#     positions_dff = positions_df.copy()
+#     if ticker_var:
+#         positions_dff = positions_dff.loc[positions_dff['ticker'] == ticker_var, :]
+#
+#     return positions_dff.to_dict('records'), row_var
 
 # update transaction price time series table
 @app.callback(
-    Output(component_id='transaction_price_time_series_graph', component_property='figure'),
-    Input(ticker_drop, 'value')
+    [Output(component_id='transaction_price_time_series_graph', component_property='figure')],
+    [Input('summaryTable_id', 'active_cell')]
 )
-def update_transactions_price_graph(ticker_var):
+def update_transactions_price_graph(active_cell):
+    # print(active_cell)
+    if active_cell is None:
+        return no_update
+
     transactions_dff = transactions_df.copy()
+    riched_positions_dff = riched_positions_df.copy()
+
+    row = active_cell["row"]
+    ticker_var = riched_positions_dff.at[row, "Ticker"]
+
     if ticker_var:
         transactions_dff = transactions_dff.loc[transactions_dff['ticker'] == ticker_var, :]
-        if ticker_var == 'BTC':
-            price_url = CRYPTO_PRICE_URL.format(ticker=ticker_var)
-        else:
-            price_url = EQUITY_PRICE_URL.format(ticker=ticker_var)
-        market_price_response = requests.get(price_url)
-        ticker_market_price = market_price_response.json()['results'][0]['c']
+        ticker_market_price = marketData_df.loc[marketData_df['ticker'] == ticker_var, 'latest_price'].values[0]
         # create the chart
         fig = px.line(x=transactions_dff['date'].unique().tolist(),
-                      y=transactions_dff['price'],
+                      y=transactions_dff['price'].tolist(),
                       labels=dict(x='Date', y='Purchase price'),
                       title=ticker_var+' Purchase Price Trend',
                       markers=True)
         fig.add_hline(y=ticker_market_price,
                       line_dash='dash',
                       line_color='green',
-                      annotation_text='latest market price',
+                      annotation_text='latest mkt. price = '+str(ticker_market_price),
                       annotation_position='bottom right')
 
-    return fig
+    return [fig]
 
 # update transaction quantity time series table
 @app.callback(
-    Output(component_id='transaction_quantity_time_series_graph', component_property='figure'),
-    Input(ticker_drop, 'value')
+    [Output(component_id='transaction_quantity_time_series_graph', component_property='figure')],
+    [Input('summaryTable_id', 'active_cell')]
 )
-def update_transactions_quantity_graph(ticker_var):
+def update_transactions_quantity_graph(active_cell):
+    riched_positions_dff = riched_positions_df.copy()
     transactions_dff = transactions_df.copy()
     positions_dff = positions_df.copy()
+
+    row = active_cell["row"]
+    ticker_var = riched_positions_dff.at[row, "Ticker"]
+
     if ticker_var:
         transactions_dff = transactions_dff.loc[transactions_dff['ticker'] == ticker_var, :]
         positions_dff = positions_dff.loc[positions_dff['ticker'] == ticker_var, :]
@@ -226,7 +209,15 @@ def update_transactions_quantity_graph(ticker_var):
             secondary_y=True
         )
 
-    return fig
+        # legend location
+        fig.update_layout(legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01
+        ))
+
+    return [fig]
 
 
 if __name__ == '__main__':
