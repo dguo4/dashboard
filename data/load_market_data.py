@@ -25,7 +25,7 @@ def return_market_data(ticker_list):
         else:
             price_url = EQUITY_PRICE_URL.format(ticker=one_ticker)
         market_price_response = requests.get(price_url)
-        time.sleep(2)
+        time.sleep(10)
         ticker_market_price = market_price_response.json()['results'][0]['c']
         market_data_list.append({'ticker': one_ticker, 'latest_price': ticker_market_price})
     # test cases
