@@ -2,6 +2,7 @@ import json
 import requests
 import pandas as pd
 import time
+import yfinance as yf
 
 
 # load config data
@@ -22,11 +23,11 @@ def return_market_data(ticker_list):
     for one_ticker in ticker_list:
         if one_ticker == 'BTC':
             price_url = CRYPTO_PRICE_URL.format(ticker=one_ticker)
+            market_price_response = requests.get(price_url)
+            ticker_market_price = market_price_response.json()['results'][0]['c']
         else:
-            price_url = EQUITY_PRICE_URL.format(ticker=one_ticker)
-        market_price_response = requests.get(price_url)
-        time.sleep(10)
-        ticker_market_price = market_price_response.json()['results'][0]['c']
+            ticker_market_price = yf.Ticker(one_ticker).info['previousClose']
+
         market_data_list.append({'ticker': one_ticker, 'latest_price': ticker_market_price})
     # test cases
     # market_data_list = [{'ticker': 'BTC', 'latest_price': 43722.52}, {'ticker': 'QQQ', 'latest_price': 392.17}, {'ticker': 'VOO', 'latest_price': 422.92}, {'ticker': 'BND', 'latest_price': 71.82}, {'ticker': 'XLF', 'latest_price': 36.13}, {'ticker': 'SCHD', 'latest_price': 72.52}]
