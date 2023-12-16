@@ -6,26 +6,18 @@
   },
   "schema": {
     "transactions_columns": ["date", "account", "ticker", "price", "quantity", "assetGroup", "assetType", "type"],
-    "positions_columns": ["date", "ticker", "price", "quantity", "assetGroup", "assetType"]
+    "positions_columns": ["date", "ticker", "price", "quantity", "assetType"],
+    "summary_columns": ["Ticker", "Asset Type", "Total Share", "Total Cost", "Avg Price", "Std Price", "Unreal PnL"]
   },
   "crypto_price_url": "https://api.polygon.io/v2/aggs/ticker/X:{ticker}USD/prev?adjusted=true&apiKey=ZfJhLblDjEydHU1bDuJp3RLfTX8pp4PC",
   "equity_price_url": "https://api.polygon.io/v2/aggs/ticker/{ticker}/prev?adjusted=true&apiKey=ZfJhLblDjEydHU1bDuJp3RLfTX8pp4PC",
   "dash_table": {
-    "transactions_dash_table_columns": [
-        {"name": "Date", "id": "date", "type": "text"},
-        {"name": "Account", "id": "account", "type": "text"},
-        {"name": "Ticker", "id": "ticker", "type": "text"},
-        {"name": "Price", "id": "price", "type": "numeric"},
-        {"name": "Quantity", "id": "quantity", "type": "numeric"}
-    ],
-    "positions_dash_table_columns": [
-      {"name": "Date", "id": "date", "type": "text"},
-      {"name": "Ticker", "id": "ticker", "type": "text"},
-      {"name": "Avg. Purchase Price", "id": "price", "type": "numeric"},
-      {"name": "Acc. Quantity", "id": "quantity", "type": "numeric"},
-      {"name": "Asset Group", "id": "assetGroup", "type": "text"},
-      {"name": "Asset Type", "id": "assetType", "type": "text"}
-    ]
+    "summary_dash_table_columns": []
+  },
+  "summary_table_columns_rename": {
+    "ticker": "Ticker",
+    "assetType": "Asset Type",
+    "cost": "Total Cost",
+    "quantity": "Total Share"
   }
-
 }
