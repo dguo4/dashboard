@@ -16,7 +16,8 @@ git_push_command = "git push heroku master"
 
 
 # write log
-log_file_path = '/home/miahappy/pyProject/autoTask/dashboard_refresh_log.txt'
+log_file_path = '/home/miahappy/pyProject/autoTask/investment-dashboard/refresh_log.txt'
+
 # Run Git commands
 try:
     # git add .

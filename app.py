@@ -89,7 +89,7 @@ app.layout = dbc.Container([
         columns=[
           {"name": "Ticker", "id": "Ticker", "type": "text"},
           {"name": "Asset Type", "id": "Asset Type", "type": "text"},
-          {"name": "Total Share", "id": "Total Share", "type": "numeric", "format": money},
+          {"name": "Total Share", "id": "Total Share", "type": "numeric"},
           {"name": "Total Cost", "id": "Total Cost", "type": "numeric", "format": money},
           {"name": "Avg. Price", "id": "Avg Price", "type": "numeric", "format": money},
           {"name": "Std. Price", "id": "Std Price", "type": "numeric", "format": percentage},
