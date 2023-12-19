@@ -1,6 +1,7 @@
 import datetime as dt
 
 from dash import Dash, html, dcc, callback, Output, Input, dash_table, no_update
+import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 from dash.dash_table import FormatTemplate
 import json
@@ -8,7 +9,6 @@ import pytz
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import time
 
 from data.load_transaction_data import return_transactions_data
 from data.load_position_data import return_positions_data, rich_positions_data
@@ -45,6 +45,25 @@ new_york_timezone = pytz.timezone('America/New_York')
 # Convert the UTC time to New York time
 new_york_time = utc_now.replace(tzinfo=pytz.utc).astimezone(new_york_timezone)
 
+# some useful info to included in dashboard
+# total asset value + unrealized pnl
+total_asset = riched_positions_df['Total Cost'].sum()
+unreal_pnl = riched_positions_df['Unreal PnL'].sum()
+fig = go.Figure()
+fig.update_layout(
+    autosize=True,
+    width=1295,
+    height=300,
+    paper_bgcolor="LightSteelBlue"
+)
+fig.add_trace(go.Indicator(
+    mode="number+delta",
+    value=total_asset,
+    title= {"text": "Account Overview"},
+    number={'prefix': "$"},
+    delta={'position': "bottom", 'reference': total_asset-unreal_pnl},
+    domain={'x': [0, 0]}))
+
 
 # dashbaord
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -58,23 +77,19 @@ app.layout = dbc.Container([
     # refresh time
     html.Header('Refreshed at ' + str(new_york_time.strftime('%Y-%m-%d %H:%M:%S')), style={'textAlign': 'right'}),
 
-    # # transaction table dropdown filter
-    # dbc.Row([
-    #     dbc.Col([
-    #         ticker_drop := dcc.Dropdown(value='VOO',
-    #                                     options=[x for x in sorted(positions_df['ticker'].unique())],
-    #                                     placeholder='Ticker')], width=3),
-    # ]),
+    html.Br(),
+
+    dcc.Graph(figure=fig),
 
     html.Br(),
-    print(riched_positions_df.columns),
+
     # positions table
     summary_table := dash_table.DataTable(
         id='summaryTable_id',
         columns=[
           {"name": "Ticker", "id": "Ticker", "type": "text"},
           {"name": "Asset Type", "id": "Asset Type", "type": "text"},
-          {"name": "Total Share", "id": "Total Share", "type": "numeric", "format": money},
+          {"name": "Total Share", "id": "Total Share", "type": "numeric"},
           {"name": "Total Cost", "id": "Total Cost", "type": "numeric", "format": money},
           {"name": "Avg. Price", "id": "Avg Price", "type": "numeric", "format": money},
           {"name": "Std. Price", "id": "Std Price", "type": "numeric", "format": percentage},
