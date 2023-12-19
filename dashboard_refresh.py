@@ -1,36 +1,25 @@
 import subprocess
 from datetime import datetime
 
-
 # current time
 current_time = datetime.now()
 current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
-# Define the commit message
-commit_message = "commit comments"
-
-# Git commands
-git_add_command = "git add ."
-git_commit_command = f'git commit -am "{commit_message}"'
-git_push_command = "git push heroku master"
-
-
 # write log
 log_file_path = '/home/miahappy/pyProject/autoTask/investment-dashboard/refresh_log.txt'
 
-# Run Git commands
-try:
-    # git add .
-    subprocess.run(git_add_command, shell=True, check=True)
+def restart_heroku_app(app_name):
+    command = f"heroku restart -a {app_name}"
+    try:
+        subprocess.run(command, shell=True, check=True)
+	with open(log_file_path, 'a') as file:
+            file.write(f"{curent_time}: Heroku app '{app_name}' restarted successfully.")
+    except subprocess.CalledProcessError as e:
+	with open(log_file_path, 'a') as file: 
+	    file.write(f"{current_time}: Error restarting Heroku app '{app_name}': {e}")
 
-    # git commit -am "commit comments"
-    subprocess.run(git_commit_command, shell=True, check=True)
-
-    # git push heroku master
-    subprocess.run(git_push_command, shell=True, check=True)
-    with open(log_file_path, 'a') as file:
-        file.write(f"{current_time}: Git commands executed successfully \n")
-except subprocess.CalledProcessError as e:
-    with open(log_file_path, 'a') as file:
-        file.write(f"{current_time}: Error executing Git command: {e} \n") 
-
+if __name__ == "__main__":
+    # Replace 'investment-dashboard' with your actual Heroku app name
+    app_name = "investment-dashboard"
+    
+    restart_heroku_app(app_name)
