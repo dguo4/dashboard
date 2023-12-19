@@ -12,14 +12,14 @@ def restart_heroku_app(app_name):
     command = f"heroku restart -a {app_name}"
     try:
         subprocess.run(command, shell=True, check=True)
-	with open(log_file_path, 'a') as file:
+        with open(log_file_path, 'a') as file:
             file.write(f"{curent_time}: Heroku app '{app_name}' restarted successfully.")
     except subprocess.CalledProcessError as e:
-	with open(log_file_path, 'a') as file: 
-	    file.write(f"{current_time}: Error restarting Heroku app '{app_name}': {e}")
+        with open(log_file_path, 'a') as file:
+            file.write(f"{current_time}: Error restarting Heroku app '{app_name}': {e}")
 
 if __name__ == "__main__":
-    # Replace 'investment-dashboard' with your actual Heroku app name
+    # Replace 'investment-dashboa
     app_name = "investment-dashboard"
     
     restart_heroku_app(app_name)
