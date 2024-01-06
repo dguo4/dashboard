@@ -1,11 +1,7 @@
 import json
 import requests
 import pandas as pd
-import time
-import ccxt
 import yfinance as yf
-from datetime import timedelta
-
 
 # load config data
 config_file = open('./config/dashboard.json')
