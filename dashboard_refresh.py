@@ -13,7 +13,7 @@ def restart_heroku_app(app_name):
     try:
         subprocess.run(command, shell=True, check=True)
         with open(log_file_path, 'a') as file:
-            file.write(f"{curent_time}: Heroku app '{app_name}' restarted successfully.")
+            file.write(f"{current_time}: Heroku app '{app_name}' restarted successfully.")
     except subprocess.CalledProcessError as e:
         with open(log_file_path, 'a') as file:
             file.write(f"{current_time}: Error restarting Heroku app '{app_name}': {e}")

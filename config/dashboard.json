@@ -10,6 +10,7 @@
     "summary_columns": ["Ticker", "Asset Type", "Total Share", "Total Cost", "Avg Price", "Std Price", "Unreal PnL"]
   },
   "crypto_price_url": "https://api.polygon.io/v2/aggs/ticker/X:{ticker}USD/prev?adjusted=true&apiKey=ZfJhLblDjEydHU1bDuJp3RLfTX8pp4PC",
+  "crypto_history_price_url": "https://api.polygon.io/v2/aggs/ticker/X:{ticker}USD/range/1/day/{start_date}/{end_date}?adjusted=true&sort=asc&apiKey=ZfJhLblDjEydHU1bDuJp3RLfTX8pp4PC",
   "equity_price_url": "https://api.polygon.io/v2/aggs/ticker/{ticker}/prev?adjusted=true&apiKey=ZfJhLblDjEydHU1bDuJp3RLfTX8pp4PC",
   "dash_table": {
     "summary_dash_table_columns": []

@@ -3,8 +3,65 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/pkg_resources/_vendor/importlib_resources" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/pkg_resources/_vendor/jaraco" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/pkg_resources/_vendor/more_itertools" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/pkg_resources/_vendor/platformdirs" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/setuptools/_vendor/importlib_metadata" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/setuptools/_vendor/importlib_resources" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/setuptools/_vendor/jaraco" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/setuptools/_vendor/tomli" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/setuptools/config" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/aiodns" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/aiodns-3.1.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/aiohttp" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/aiohttp-3.9.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/aiosignal" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/aiosignal-1.3.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/appdirs-1.4.4.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/async_timeout" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/async_timeout-4.0.3.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/attr" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/attrs" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/attrs-23.1.0.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/beautifulsoup4-4.12.2.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/bs4" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/ccxt" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/ccxt-4.1.96.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/cffi" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/cffi-1.16.0.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/cryptography" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/cryptography-41.0.7.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/frozendict" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/frozendict-2.3.8.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/frozenlist" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/frozenlist-1.4.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/html5lib" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/html5lib-1.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/lxml" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/lxml-4.9.3-py3.9.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/multidict" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/multidict-6.0.4.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/multitasking" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/multitasking-0.0.11.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/peewee-3.17.0.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/playhouse" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/pycares" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/pycares-4.4.0.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/pycparser" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/pycparser-2.21.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/setuptools-69.0.2.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/soupsieve" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/soupsieve-2.5.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/webencodings" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/webencodings-0.5.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/yarl" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/yarl-1.9.4.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/yfinance" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/lib/python3.9/site-packages/yfinance-0.2.33.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv/include" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.9 (dashboard)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

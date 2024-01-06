@@ -34,7 +34,7 @@ def return_positions_data():
     return positions_df
 
 
-def rich_positions_data(transactions_df, positions_df, market_df):
+def rich_positions_data(transactions_df, market_df):
     transactions_df['cost'] = transactions_df['price']*transactions_df['quantity']
     transactions_std_df = transactions_df.loc[:, ['ticker', 'price']].groupby('ticker').agg(np.std, ddof=0).reset_index()
     transactions_std_df.rename(columns={'price': 'std'}, inplace=True)

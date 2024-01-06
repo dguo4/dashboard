@@ -30,3 +30,39 @@ def return_transactions_data():
     transactions_df['date'] = pd.to_datetime(transactions_df['date'])
     transactions_df = transactions_df.sort_values(by=['date'], ascending=False)
     return transactions_df
+
+
+def rich_transactions_data(positions_df, marketHistoryDate_df):
+    min_date = min(marketHistoryDate_df['date'])
+    positions_df['date'] = pd.to_datetime(positions_df['date'])
+    positions_df = positions_df.loc[positions_df['date'] >= min_date]
+    riched_historical_positions_df = positions_df.merge(marketHistoryDate_df, on=['date', 'ticker'], how='right')
+
+    riched_historical_positions_df.sort_values(by=['ticker', 'date'], inplace=True)
+
+    riched_historical_positions_df_list = []
+    for one_ticker in riched_historical_positions_df['ticker'].unique().tolist():
+        single_ticker_riched_historical_positions_df = riched_historical_positions_df.loc[riched_historical_positions_df['ticker'] == one_ticker]
+        # fill n/a with previous data
+        single_ticker_riched_historical_positions_df['quantity'].fillna(method='ffill', inplace=True)
+        single_ticker_riched_historical_positions_df['price'].fillna(method='ffill', inplace=True)
+        riched_historical_positions_df_list.append(single_ticker_riched_historical_positions_df)
+
+    enhanced_riched_historical_positions_df = pd.concat(riched_historical_positions_df_list)
+
+    enhanced_riched_historical_positions_df = enhanced_riched_historical_positions_df.loc[~enhanced_riched_historical_positions_df['close'].isnull()]
+    enhanced_riched_historical_positions_df = enhanced_riched_historical_positions_df.loc[~enhanced_riched_historical_positions_df['price'].isnull()]
+    enhanced_riched_historical_positions_df = enhanced_riched_historical_positions_df.loc[enhanced_riched_historical_positions_df['date'] != min_date]
+
+    enhanced_riched_historical_positions_df['pnl'] = (enhanced_riched_historical_positions_df['close'] - enhanced_riched_historical_positions_df['price'])*enhanced_riched_historical_positions_df['quantity']
+    enhanced_riched_historical_positions_df = enhanced_riched_historical_positions_df.pivot_table(values='pnl', index='date', columns='ticker', aggfunc='sum', fill_value=0)
+    # VOO has the longest investment history.
+    for one_ticker in ['VOO']:
+        enhanced_riched_historical_positions_df = enhanced_riched_historical_positions_df.loc[enhanced_riched_historical_positions_df[one_ticker] != 0.0]
+    enhanced_riched_historical_positions_df.reset_index(inplace=True)
+
+    selected_marketHistoryDate_df = marketHistoryDate_df[marketHistoryDate_df['date'].isin(enhanced_riched_historical_positions_df['date'])]
+    selected_marketHistoryDate_df = selected_marketHistoryDate_df.pivot_table(values='close', index='date', columns='ticker', fill_value=0)
+    selected_marketHistoryDate_df.reset_index(inplace=True)
+
+    return enhanced_riched_historical_positions_df, selected_marketHistoryDate_df
