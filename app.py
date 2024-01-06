@@ -270,7 +270,7 @@ def update_pnl_trend_graph(active_cell):
         fig.update_xaxes(title_text="Date")
 
         fig.update_yaxes(
-            title_text="market price  ",
+            title_text="market price <b>(blue)</b>",
             secondary_y=False
         )
         fig.update_yaxes(
