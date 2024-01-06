@@ -23,7 +23,7 @@ config = json.load(config_file)
 # format
 money = FormatTemplate.money(2)
 percentage = FormatTemplate.percentage(2)
-quantity = FormatTemplate.quantity(5)
+#quantity = FormatTemplate.quantity(5)
 
 # get New York timezone
 # Get the current time in UTC
@@ -101,7 +101,7 @@ app.layout = dbc.Container([
         columns=[
           {"name": "Ticker", "id": "Ticker", "type": "text"},
           {"name": "Asset Type", "id": "Asset Type", "type": "text"},
-          {"name": "Total Share", "id": "Total Share", "type": "numeric", "format": quantity},
+          {"name": "Total Share", "id": "Total Share", "type": "numeric"},
           {"name": "Total Cost", "id": "Total Cost", "type": "numeric", "format": money},
           {"name": "Avg. Price", "id": "Avg Price", "type": "numeric", "format": money},
           {"name": "Std. Price", "id": "Std Price", "type": "numeric", "format": percentage},
