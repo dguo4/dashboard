@@ -50,7 +50,14 @@ marketHistoryDate_df = return_market_history_data(ticker_list,
 
 riched_positions_df = rich_positions_data(transactions_df, marketData_df)
 riched_pnl_df, mkt_price_df = rich_transactions_data(positions_df, marketHistoryDate_df)
+account_pnl_df = riched_pnl_df.copy(deep=True)
+numeric_columns = account_pnl_df.drop('date', axis=1)
+account_pnl_df['pnl'] = numeric_columns.sum(axis=1)
+pnl_corr_matrix = account_pnl_df.loc[:, ticker_list+['pnl']].corr()
+account_pnl_df.drop(ticker_list, axis=1, inplace=True)
 
+# calculate mkt price correlation
+mkt_price_corr_matrix = mkt_price_df.loc[:, ticker_list].corr()
 
 
 # some useful info to included in dashboard
@@ -146,7 +153,34 @@ app.layout = dbc.Container([
     # unrealized pnl bar graph
     dcc.Graph(
         id='pnl_trend_bar_graph'
-    )
+    ),
+
+    html.Div([
+        # mkt price correlation heat map
+        dcc.Graph(
+            id='correlation-map',
+            figure=px.imshow(mkt_price_corr_matrix,
+                             labels=dict(x="Variables", y="Variables", color="Correlation"),
+                             x=mkt_price_corr_matrix.columns,
+                             y=mkt_price_corr_matrix.columns,
+                             color_continuous_scale="YlOrRd").update_layout(title='Market Price Correlation')
+        )
+    ], style={'width': '48%', 'display': 'inline-block'}),
+
+    html.Div([
+        # pnl correlation heat map
+        dcc.Graph(
+            id='correlation-map',
+            figure=px.imshow(pnl_corr_matrix,
+                             labels=dict(x="Ticker", y="Ticker", color="Correlation"),
+                             x=pnl_corr_matrix.columns,
+                             y=pnl_corr_matrix.columns,
+                             color_continuous_scale="Greens").update_layout(title='Pnl Correlation')
+        )
+    ], style={'width': '48%', 'display': 'inline-block'}),
+
+
+
 ])
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -257,8 +291,8 @@ def update_pnl_trend_graph(active_cell):
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
-            go.Scatter(x=mkt_price_dff['date'].tolist(),
-                       y=mkt_price_dff[ticker_var],
+            go.Scatter(x=account_pnl_df['date'].tolist(),
+                       y=account_pnl_df['pnl'],
                        name='Market Price'), secondary_y=False)
 
         fig.add_trace(
@@ -270,11 +304,11 @@ def update_pnl_trend_graph(active_cell):
         fig.update_xaxes(title_text="Date")
 
         fig.update_yaxes(
-            title_text="market price <b>(blue)</b>",
+            title_text="account pnl <b>(blue)</b>",
             secondary_y=False
         )
         fig.update_yaxes(
-            title_text="unreal. PnL <b>(orange)</b>",
+            title_text=ticker_var+" PnL <b>(orange)</b>",
             secondary_y=True
         )
 
