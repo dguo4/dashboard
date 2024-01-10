@@ -158,7 +158,7 @@ app.layout = dbc.Container([
     html.Div([
         # mkt price correlation heat map
         dcc.Graph(
-            id='correlation-map',
+            id='mkt_price_corr_map',
             figure=px.imshow(mkt_price_corr_matrix,
                              labels=dict(x="Variables", y="Variables", color="Correlation"),
                              x=mkt_price_corr_matrix.columns,
@@ -170,7 +170,7 @@ app.layout = dbc.Container([
     html.Div([
         # pnl correlation heat map
         dcc.Graph(
-            id='correlation-map',
+            id='pnl_corr_map',
             figure=px.imshow(pnl_corr_matrix,
                              labels=dict(x="Ticker", y="Ticker", color="Correlation"),
                              x=pnl_corr_matrix.columns,
