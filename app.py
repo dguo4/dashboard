@@ -73,11 +73,11 @@ summary_fig_layout = go.Layout(
     # Check the Plotly documentation for more customization options:
     # https://plotly.com/python/reference/indicator/
     template="plotly_white",
-    width=300,
+    width=1300,
     height=200,
     # Set the size of the indicators
     # You can adjust the size attribute to control the size of the indicators
-    # Larger values result in larger indicators
+    # Larger values result i
     # For example, size=100 would make the indicators much larger
     # You can set it to smaller values like size=20 to limit the size of the indicators
     # Experiment with different values to achieve the desired size
@@ -95,6 +95,9 @@ summary_fig.add_trace(go.Indicator(
     number={'prefix': "$"},
     delta={'position': "bottom", 'reference': total_asset-unreal_pnl},
     domain={'x': [0, 0]}))
+riched_pnl_dff = riched_pnl_df.copy(deep=True)
+riched_pnl_dff['Unreal PnL'] = riched_pnl_dff.drop(columns=['date']).sum(axis=1)
+summary_fig.add_trace(go.Scatter(y=riched_pnl_dff['Unreal PnL'], x=riched_pnl_dff['date']))
 
 # pie chart to show invest method
 invest_method = []
