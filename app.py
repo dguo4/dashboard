@@ -279,7 +279,7 @@ def update_transactions_quantity_graph(active_cell):
         )
         fig.update_yaxes(
             title_text="transaction quantity <b> (orange) </b>",
-            range=[None, max_transaction_quantity*2],
+            range=[None, max_transaction_quantity*1.2],
             secondary_y=True
         )
 
