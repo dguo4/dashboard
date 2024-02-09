@@ -32,6 +32,17 @@ def return_transactions_data():
     return transactions_df
 
 
+def return_cost_data(transactions_df, look_back=360):
+    transactions_dff = transactions_df.copy(deep=True)
+    transactions_dff['cost'] = transactions_dff['price']*transactions_dff['quantity']
+    transactions_dff['date'] = pd.to_datetime(transactions_dff['date'])
+    transactions_dff['date'] = transactions_dff['date'].dt.strftime('%Y-%m')
+
+    pivot_dff = pd.pivot_table(transactions_dff.loc[:, ['date', 'ticker', 'cost']], values='cost', index=['date', 'ticker'], aggfunc='sum').reset_index()
+
+    return pivot_dff
+
+
 def rich_transactions_data(positions_df, marketHistoryDate_df):
     min_date = min(marketHistoryDate_df['date'])
     positions_df['date'] = pd.to_datetime(positions_df['date'])

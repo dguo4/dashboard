@@ -10,9 +10,16 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from data.load_transaction_data import return_transactions_data, rich_transactions_data
+# data
+from data.load_transaction_data import return_transactions_data, rich_transactions_data, return_cost_data
 from data.load_position_data import return_positions_data, rich_positions_data
 from data.load_market_data import return_market_data, return_market_history_data
+
+# chart
+from chart.account_overview_trend_chart import account_overview_trend_chart
+from chart.mkt_price_corr_matrix_chart import mkt_price_corr_matrix_chart
+from chart.pnl_corr_matrix_chart import pnl_corr_matrix_chart
+from chart.invest_cost_trend_chart import invest_cost_trend_chart
 
 
 # load config data
@@ -36,6 +43,7 @@ new_york_time = utc_now.replace(tzinfo=pytz.utc).astimezone(new_york_timezone)
 
 # transactions data
 transactions_df = return_transactions_data()
+cost_trend_df = return_cost_data(transactions_df, look_back=360)
 
 # positions data
 positions_df = return_positions_data()
@@ -58,46 +66,7 @@ account_pnl_df.drop(ticker_list, axis=1, inplace=True)
 # calculate mkt price correlation
 mkt_price_corr_matrix = mkt_price_df.loc[:, ticker_list].corr()
 
-
-# some useful info to included in dashboard
-# total asset value + unrealized pnl
-total_asset = riched_positions_df['Total Cost'].sum()
-unreal_pnl = riched_positions_df['Unreal PnL'].sum()
-summary_fig_layout = go.Layout(
-    # Set the size of indicators
-    # Adjust the size value to limit the size of indicators
-    # Higher size values result in larger indicators
-    # You can also use a list to specify different sizes for different indicators
-    # For example: size=[20, 30, 15, 25]
-    # This would set different sizes for each indicator respectively
-    # Check the Plotly documentation for more customization options:
-    # https://plotly.com/python/reference/indicator/
-    template="plotly_white",
-    width=1300,
-    height=200,
-    # Set the size of the indicators
-    # You can adjust the size attribute to control the size of the indicators
-    # Larger values result i
-    # For example, size=100 would make the indicators much larger
-    # You can set it to smaller values like size=20 to limit the size of the indicators
-    # Experiment with different values to achieve the desired size
-    margin=dict(l=0, r=0, t=20, b=5),
-    paper_bgcolor='LightSteelBlue', # LightSteelBlue
-    plot_bgcolor='rgba(0,0,0,0)',
-    showlegend=False
-)
-
-summary_fig = go.Figure(layout=summary_fig_layout)
-summary_fig.add_trace(go.Indicator(
-    mode="number+delta",
-    value=total_asset,
-    title= {"text": "Account Overview"},
-    number={'prefix': "$"},
-    delta={'position': "bottom", 'reference': total_asset-unreal_pnl},
-    domain={'x': [0, 0]}))
-riched_pnl_dff = riched_pnl_df.copy(deep=True)
-riched_pnl_dff['Unreal PnL'] = riched_pnl_dff.drop(columns=['date']).sum(axis=1)
-summary_fig.add_trace(go.Scatter(y=riched_pnl_dff['Unreal PnL'], x=riched_pnl_dff['date']))
+account_overview_trend_chart = account_overview_trend_chart(riched_positions_df, riched_pnl_df)
 
 # pie chart to show invest method
 invest_method = []
@@ -118,7 +87,7 @@ app.layout = dbc.Container([
 
     html.Br(),
 
-    dcc.Graph(figure=summary_fig),
+    dcc.Graph(figure=account_overview_trend_chart),
 
     html.Br(),
 
@@ -165,41 +134,28 @@ app.layout = dbc.Container([
                   })
     ]),
 
-    # # investment method pie graph
-    # dcc.Graph(
-    #     id='invest_method_pie_graph'
-    # )
-
-    # # unrealized pnl bar graph
-    # dcc.Graph(
-    #     id='pnl_trend_bar_graph'
-    # ),
-
+    # mkt price correlation heat map
     html.Div([
-        # mkt price correlation heat map
         dcc.Graph(
             id='mkt_price_corr_map',
-            figure=px.imshow(mkt_price_corr_matrix,
-                             labels=dict(x="Variables", y="Variables", color="Correlation"),
-                             x=mkt_price_corr_matrix.columns,
-                             y=mkt_price_corr_matrix.columns,
-                             color_continuous_scale="YlOrRd").update_layout(title='Market Price Correlation')
+            figure=mkt_price_corr_matrix_chart(mkt_price_corr_matrix)
+        )
+    ], style={'width': '48%', 'display': 'inline-block'}),
+
+    # pnl correlation heat map
+    html.Div([
+        dcc.Graph(
+            id='pnl_corr_map',
+            figure=pnl_corr_matrix_chart(pnl_corr_matrix)
         )
     ], style={'width': '48%', 'display': 'inline-block'}),
 
     html.Div([
-        # pnl correlation heat map
         dcc.Graph(
-            id='pnl_corr_map',
-            figure=px.imshow(pnl_corr_matrix,
-                             labels=dict(x="Ticker", y="Ticker", color="Correlation"),
-                             x=pnl_corr_matrix.columns,
-                             y=pnl_corr_matrix.columns,
-                             color_continuous_scale="Greens").update_layout(title='Pnl Correlation')
-        )
-    ], style={'width': '48%', 'display': 'inline-block'}),
+            id='invest_cost_trend',
+            figure=invest_cost_trend_chart(cost_trend_df))
 
-
+    ], style={'width': '100%', 'display': 'inline-block'})
 
 ])
 
@@ -292,55 +248,6 @@ def update_transactions_quantity_graph(active_cell):
         ))
 
     return [fig]
-
-# update unrealized pnl time series bar chart
-# @app.callback(
-#     [Output(component_id='pnl_trend_bar_graph', component_property='figure')],
-#     [Input('summaryTable_id', 'active_cell')]
-# )
-# def update_pnl_trend_graph(active_cell):
-#     riched_positions_dff = riched_positions_df.copy()
-#     riched_pnl_dff = riched_pnl_df.copy()
-#     mkt_price_dff = mkt_price_df.copy()
-#
-#     row = active_cell["row"]
-#     ticker_var = riched_positions_dff.at[row, "Ticker"]
-#
-#     if ticker_var:
-#         # Create figure with secondary y-axis
-#         fig = make_subplots(specs=[[{"secondary_y": True}]])
-#
-#         fig.add_trace(
-#             go.Scatter(x=account_pnl_df['date'].tolist(),
-#                        y=account_pnl_df['pnl'],
-#                        name='Market Price'), secondary_y=False)
-#
-#         fig.add_trace(
-#             go.Bar(x=riched_pnl_dff['date'].tolist(),
-#                    y=riched_pnl_dff[ticker_var],
-#                    name='PnL'), secondary_y=True)
-#
-#         # Set x-axis title
-#         fig.update_xaxes(title_text="Date")
-#
-#         fig.update_yaxes(
-#             title_text="account pnl <b>(blue)</b>",
-#             secondary_y=False
-#         )
-#         fig.update_yaxes(
-#             title_text=ticker_var+" PnL <b>(orange)</b>",
-#             secondary_y=True
-#         )
-#
-#         # legend location
-#         fig.update_layout(legend=dict(
-#             yanchor="top",
-#             y=0.99,
-#             xanchor="left",
-#             x=0.01
-#         ))
-#
-#     return [fig]
 
 
 if __name__ == '__main__':
